@@ -18,9 +18,14 @@ export default function CommentSection({ postId }: Props) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const PREVIEW_COUNT = 3;
+  const hasMore = comments.length > PREVIEW_COUNT;
+  const visibleComments = expanded || !hasMore ? comments : comments.slice(0, PREVIEW_COUNT);
 
   useEffect(() => {
     api.get<Comment[]>(`/api/posts/${postId}/comments`)
@@ -68,8 +73,9 @@ export default function CommentSection({ postId }: Props) {
       ) : comments.length === 0 ? (
         <p className="text-xs text-gray-400 py-2">Nenhum comentário ainda. Seja o primeiro!</p>
       ) : (
+        <>
         <ul className="space-y-3 mb-3">
-          {comments.map((c) => {
+          {visibleComments.map((c) => {
             const avatarUrl = getAvatarUrl(c);
             const isOwn = user?.id === c.authorId;
             return (
@@ -110,6 +116,17 @@ export default function CommentSection({ postId }: Props) {
             );
           })}
         </ul>
+        {hasMore && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-blue-600 hover:underline mb-3 font-medium"
+          >
+            {expanded
+              ? "Ocultar comentários"
+              : `Ver mais ${comments.length - PREVIEW_COUNT} comentário${comments.length - PREVIEW_COUNT > 1 ? "s" : ""}`}
+          </button>
+        )}
+        </>
       )}
 
       {/* Formulário de novo comentário */}
