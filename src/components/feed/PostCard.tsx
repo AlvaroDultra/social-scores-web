@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import CommentSection from "./CommentSection";
 import type { Post } from "@/types";
 import { formatRelative } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
@@ -21,6 +22,7 @@ export default function PostCard({ post, onDeleted }: Props) {
   const isAuthor = user?.id === post.authorId;
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   async function handleDelete() {
     if (!confirmDelete) { setConfirmDelete(true); return; }
@@ -119,6 +121,17 @@ export default function PostCard({ post, onDeleted }: Props) {
           <PostTimer endsAt={post.votingEndsAt} closed={post.closed} />
         </div>
       </div>
+
+      {/* Botão comentários */}
+      <button
+        onClick={() => setShowComments((v) => !v)}
+        className="mt-3 text-xs text-gray-400 hover:text-blue-600 transition font-medium flex items-center gap-1"
+      >
+        💬 {showComments ? "Ocultar comentários" : "Comentários"}
+      </button>
+
+      {/* Seção de comentários */}
+      {showComments && <CommentSection postId={post.id} />}
     </div>
   );
 }

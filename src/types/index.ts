@@ -86,6 +86,16 @@ export interface HistorySummary {
   recentInteractions: number;
 }
 
+export interface Comment {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorNickname: string;
+  authorAvatarUrl?: string;
+  content: string;
+  createdAt: string;
+}
+
 export interface Notification {
   id: string;
   type: string;
