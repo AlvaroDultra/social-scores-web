@@ -80,7 +80,7 @@ export default function PostCard({ post, onDeleted }: Props) {
       {post.imageUrl && (
         <div className="relative w-full rounded-xl overflow-hidden mb-3 bg-gray-100">
           <Image
-            src={`${process.env.NEXT_PUBLIC_API_URL}${post.imageUrl}`}
+            src={post.imageUrl!.startsWith("http") ? post.imageUrl! : `${process.env.NEXT_PUBLIC_API_URL}${post.imageUrl}`}
             alt="Imagem do post"
             width={800}
             height={400}
