@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import CommentSection from "./CommentSection";
+import ImageLightbox from "@/components/ui/ImageLightbox";
 import type { Post } from "@/types";
 import { formatRelative } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
@@ -22,6 +23,7 @@ export default function PostCard({ post, onDeleted }: Props) {
   const isAuthor = user?.id === post.authorId;
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   async function handleDelete() {
     if (!confirmDelete) { setConfirmDelete(true); return; }
@@ -89,15 +91,26 @@ export default function PostCard({ post, onDeleted }: Props) {
 
       {/* Image */}
       {post.imageUrl && (
-        <div className="relative w-full rounded-xl overflow-hidden mb-3 bg-gray-100">
-          <Image
-            src={post.imageUrl!.startsWith("http") ? post.imageUrl! : `${process.env.NEXT_PUBLIC_API_URL}${post.imageUrl}`}
-            alt="Imagem do post"
-            width={800}
-            height={400}
-            className="w-full object-cover max-h-80"
-          />
-        </div>
+        <>
+          <div
+            className="relative w-full rounded-xl overflow-hidden mb-3 bg-gray-100 cursor-zoom-in"
+            onClick={() => setLightboxOpen(true)}
+          >
+            <Image
+              src={post.imageUrl!.startsWith("http") ? post.imageUrl! : `${process.env.NEXT_PUBLIC_API_URL}${post.imageUrl}`}
+              alt="Imagem do post"
+              width={800}
+              height={400}
+              className="w-full object-cover max-h-80 hover:brightness-95 transition"
+            />
+          </div>
+          {lightboxOpen && (
+            <ImageLightbox
+              src={post.imageUrl!.startsWith("http") ? post.imageUrl! : `${process.env.NEXT_PUBLIC_API_URL}${post.imageUrl}`}
+              onClose={() => setLightboxOpen(false)}
+            />
+          )}
+        </>
       )}
 
       {/* Video */}
