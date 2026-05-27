@@ -58,6 +58,16 @@ export default function CommentSection({ postId }: Props) {
     }
   }
 
+  async function handleReact(commentId: string, value: 1 | -1) {
+    if (!isAuthenticated) { toast.error("Faça login para reagir"); return; }
+    try {
+      const { data } = await api.post<Comment>(`/api/comments/${commentId}/react`, { value });
+      setComments((prev) => prev.map((c) => c.id === commentId ? data : c));
+    } catch {
+      toast.error("Erro ao reagir");
+    }
+  }
+
   function getAvatarUrl(c: Comment) {
     if (!c.authorAvatarUrl) return null;
     return c.authorAvatarUrl.startsWith("http")
@@ -74,58 +84,84 @@ export default function CommentSection({ postId }: Props) {
         <p className="text-xs text-gray-400 py-2">Nenhum comentário ainda. Seja o primeiro!</p>
       ) : (
         <>
-        <ul className="space-y-3 mb-3">
-          {visibleComments.map((c) => {
-            const avatarUrl = getAvatarUrl(c);
-            const isOwn = user?.id === c.authorId;
-            return (
-              <li key={c.id} className="flex items-start gap-2">
-                {/* Avatar */}
-                <Link href={`/profile/${c.authorNickname}`} className="shrink-0">
-                  <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 overflow-hidden">
-                    {avatarUrl ? (
-                      <Image src={avatarUrl} alt={c.authorNickname} width={28} height={28} className="object-cover w-full h-full" />
-                    ) : (
-                      c.authorNickname[0].toUpperCase()
-                    )}
-                  </div>
-                </Link>
-
-                {/* Conteúdo */}
-                <div className="flex-1 min-w-0 bg-gray-50 rounded-xl px-3 py-2">
-                  <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <Link href={`/profile/${c.authorNickname}`} className="text-xs font-semibold text-blue-700 hover:underline">
-                      @{c.authorNickname}
-                    </Link>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-[10px] text-gray-400">{formatRelative(c.createdAt)}</span>
-                      {isOwn && (
-                        <button
-                          onClick={() => handleDelete(c.id)}
-                          className="text-[10px] text-gray-300 hover:text-red-400 transition"
-                          title="Deletar comentário"
-                        >
-                          ✕
-                        </button>
+          <ul className="space-y-3 mb-3">
+            {visibleComments.map((c) => {
+              const avatarUrl = getAvatarUrl(c);
+              const isOwn = user?.id === c.authorId;
+              return (
+                <li key={c.id} className="flex items-start gap-2">
+                  {/* Avatar */}
+                  <Link href={`/profile/${c.authorNickname}`} className="shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 overflow-hidden">
+                      {avatarUrl ? (
+                        <Image src={avatarUrl} alt={c.authorNickname} width={28} height={28} className="object-cover w-full h-full" />
+                      ) : (
+                        c.authorNickname[0].toUpperCase()
                       )}
                     </div>
+                  </Link>
+
+                  {/* Conteúdo */}
+                  <div className="flex-1 min-w-0 bg-gray-50 rounded-xl px-3 py-2">
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <Link href={`/profile/${c.authorNickname}`} className="text-xs font-semibold text-blue-700 hover:underline">
+                        @{c.authorNickname}
+                      </Link>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[10px] text-gray-400">{formatRelative(c.createdAt)}</span>
+                        {isOwn && (
+                          <button
+                            onClick={() => handleDelete(c.id)}
+                            className="text-[10px] text-gray-300 hover:text-red-400 transition"
+                            title="Deletar comentário"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-gray-700 break-words mb-2">{c.content}</p>
+
+                    {/* Like / Dislike */}
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleReact(c.id, 1)}
+                        className={`flex items-center gap-1 text-xs transition ${
+                          c.myReaction === 1
+                            ? "text-blue-600 font-semibold"
+                            : "text-gray-400 hover:text-blue-500"
+                        }`}
+                      >
+                        👍 {c.likes > 0 && <span>{c.likes}</span>}
+                      </button>
+                      <button
+                        onClick={() => handleReact(c.id, -1)}
+                        className={`flex items-center gap-1 text-xs transition ${
+                          c.myReaction === -1
+                            ? "text-red-500 font-semibold"
+                            : "text-gray-400 hover:text-red-400"
+                        }`}
+                      >
+                        👎 {c.dislikes > 0 && <span>{c.dislikes}</span>}
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-700 break-words">{c.content}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        {hasMore && (
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            className="text-xs text-blue-600 hover:underline mb-3 font-medium"
-          >
-            {expanded
-              ? "Ocultar comentários"
-              : `Ver mais ${comments.length - PREVIEW_COUNT} comentário${comments.length - PREVIEW_COUNT > 1 ? "s" : ""}`}
-          </button>
-        )}
+                </li>
+              );
+            })}
+          </ul>
+
+          {hasMore && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="text-xs text-blue-600 hover:underline mb-3 font-medium"
+            >
+              {expanded
+                ? "Ocultar comentários"
+                : `Ver mais ${comments.length - PREVIEW_COUNT} comentário${comments.length - PREVIEW_COUNT > 1 ? "s" : ""}`}
+            </button>
+          )}
         </>
       )}
 

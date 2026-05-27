@@ -95,6 +95,9 @@ export interface Comment {
   authorAvatarUrl?: string;
   content: string;
   createdAt: string;
+  likes: number;
+  dislikes: number;
+  myReaction?: number | null;
 }
 
 export interface Notification {
