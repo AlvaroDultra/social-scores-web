@@ -93,15 +93,17 @@ export default function PostCard({ post, onDeleted }: Props) {
       {post.imageUrl && (
         <>
           <div
-            className="relative w-full rounded-xl overflow-hidden mb-3 bg-gray-100 cursor-zoom-in"
+            className="relative w-full rounded-xl overflow-hidden mb-3 bg-gray-100 cursor-zoom-in select-none"
             onClick={() => setLightboxOpen(true)}
+            onContextMenu={(e) => e.preventDefault()}
           >
             <Image
               src={post.imageUrl!.startsWith("http") ? post.imageUrl! : `${process.env.NEXT_PUBLIC_API_URL}${post.imageUrl}`}
               alt="Imagem do post"
               width={800}
               height={400}
-              className="w-full object-cover max-h-80 hover:brightness-95 transition"
+              className="w-full object-cover max-h-80 hover:brightness-95 transition pointer-events-none"
+              draggable={false}
             />
           </div>
           {lightboxOpen && (

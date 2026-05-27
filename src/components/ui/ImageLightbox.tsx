@@ -40,16 +40,18 @@ export default function ImageLightbox({ src, alt = "Imagem", onClose }: Props) {
 
       {/* Imagem — clique nela não fecha o modal */}
       <div
-        className="relative max-w-[90vw] max-h-[90vh]"
+        className="relative max-w-[90vw] max-h-[90vh] select-none"
         onClick={(e) => e.stopPropagation()}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <Image
           src={src}
           alt={alt}
           width={1200}
           height={1200}
-          className="rounded-xl object-contain max-w-[90vw] max-h-[90vh] shadow-2xl"
+          className="rounded-xl object-contain max-w-[90vw] max-h-[90vh] shadow-2xl pointer-events-none"
           style={{ width: "auto", height: "auto" }}
+          draggable={false}
           unoptimized
         />
       </div>
