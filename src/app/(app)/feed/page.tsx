@@ -17,10 +17,18 @@ export default function FeedPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ content: "", targetEmail: "" });
   const [users, setUsers] = useState<UserSummary[]>([]);
+
+  // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Video state
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const loadPosts = useCallback(async (pageNum: number) => {
     setLoading(true);
@@ -47,6 +55,10 @@ export default function FeedPage() {
     if (file.size > 10 * 1024 * 1024) { toast.error("Imagem maior que 10MB"); return; }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+    // Clear video if any
+    setVideoFile(null);
+    setVideoPreview(null);
+    if (videoInputRef.current) videoInputRef.current.value = "";
   }
 
   function removeImage() {
@@ -55,9 +67,28 @@ export default function FeedPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  function handleVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 50 * 1024 * 1024) { toast.error("Vídeo maior que 50MB"); return; }
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+    // Clear image if any
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removeVideo() {
+    setVideoFile(null);
+    setVideoPreview(null);
+    if (videoInputRef.current) videoInputRef.current.value = "";
+  }
+
   function resetForm() {
     setForm({ content: "", targetEmail: "" });
     removeImage();
+    removeVideo();
     setShowForm(false);
   }
 
@@ -66,6 +97,8 @@ export default function FeedPage() {
     setSubmitting(true);
     try {
       let imageUrl: string | undefined;
+      let videoUrl: string | undefined;
+
       if (imageFile) {
         const fd = new FormData();
         fd.append("file", imageFile);
@@ -74,10 +107,21 @@ export default function FeedPage() {
         });
         imageUrl = data.url;
       }
+
+      if (videoFile) {
+        const fd = new FormData();
+        fd.append("file", videoFile);
+        const { data } = await api.post<{ url: string }>("/api/upload/video", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        videoUrl = data.url;
+      }
+
       const { data } = await api.post<Post>("/api/posts", {
         content: form.content,
         targetEmail: form.targetEmail || undefined,
         imageUrl,
+        videoUrl,
       });
       setPosts((prev) => [data, ...prev]);
       resetForm();
@@ -90,6 +134,8 @@ export default function FeedPage() {
       setSubmitting(false);
     }
   }
+
+  const hasMedia = imagePreview || videoPreview;
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-4">
@@ -130,8 +176,8 @@ export default function FeedPage() {
                 ))}
               </select>
 
-              {/* Upload de imagem */}
-              {imagePreview ? (
+              {/* Prévia de imagem */}
+              {imagePreview && (
                 <div className="relative rounded-xl overflow-hidden border border-gray-200">
                   <Image
                     src={imagePreview}
@@ -148,20 +194,58 @@ export default function FeedPage() {
                     ✕
                   </button>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-2 border-dashed border-gray-200 rounded-xl py-3 text-sm text-gray-400 hover:border-blue-400 hover:text-blue-500 transition flex items-center justify-center gap-2"
-                >
-                  📷 Adicionar foto (opcional)
-                </button>
               )}
+
+              {/* Prévia de vídeo */}
+              {videoPreview && (
+                <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-black">
+                  <video
+                    src={videoPreview}
+                    controls
+                    className="w-full max-h-56 object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeVideo}
+                    className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center hover:bg-black/80 transition text-xs font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              {/* Botões de mídia — apenas quando não há prévia */}
+              {!hasMedia && (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 border-2 border-dashed border-gray-200 rounded-xl py-3 text-sm text-gray-400 hover:border-blue-400 hover:text-blue-500 transition flex items-center justify-center gap-2"
+                  >
+                    📷 Foto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => videoInputRef.current?.click()}
+                    className="flex-1 border-2 border-dashed border-gray-200 rounded-xl py-3 text-sm text-gray-400 hover:border-purple-400 hover:text-purple-500 transition flex items-center justify-center gap-2"
+                  >
+                    🎬 Vídeo <span className="text-xs opacity-70">(máx. 10s)</span>
+                  </button>
+                </div>
+              )}
+
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/gif,image/webp"
                 onChange={handleImageChange}
+                className="hidden"
+              />
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                onChange={handleVideoChange}
                 className="hidden"
               />
 

@@ -27,6 +27,7 @@ export interface Post {
   targetNickname?: string;
   content: string;
   imageUrl?: string;
+  videoUrl?: string;
   votingEndsAt: string;
   closed: boolean;
   finalScore?: number;

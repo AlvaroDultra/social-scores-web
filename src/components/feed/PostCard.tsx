@@ -90,6 +90,18 @@ export default function PostCard({ post, onDeleted }: Props) {
         </div>
       )}
 
+      {/* Video */}
+      {post.videoUrl && (
+        <div className="relative w-full rounded-xl overflow-hidden mb-3 bg-black">
+          <video
+            src={post.videoUrl}
+            controls
+            playsInline
+            className="w-full max-h-80 object-contain"
+          />
+        </div>
+      )}
+
       {/* Footer */}
       <div className="flex items-center justify-between pt-2 border-t border-gray-50">
         <VoteButtons postId={post.id} closed={post.closed} />
