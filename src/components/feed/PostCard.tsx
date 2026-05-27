@@ -57,6 +57,16 @@ export default function PostCard({ post, onDeleted }: Props) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs text-gray-400">{formatRelative(post.createdAt)}</span>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
+              toast.success("Link copiado!");
+            }}
+            className="text-xs px-2 py-1 rounded-lg border border-gray-200 text-gray-400 hover:text-blue-500 hover:border-blue-200 transition"
+            title="Compartilhar"
+          >
+            🔗
+          </button>
           {isAuthor && (
             <button
               onClick={handleDelete}
