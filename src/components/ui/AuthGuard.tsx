@@ -16,6 +16,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (ready && !isAuthenticated()) {
+      sessionStorage.setItem("redirectAfterLogin", window.location.pathname);
       router.replace("/login");
     }
   }, [ready, isAuthenticated, router]);

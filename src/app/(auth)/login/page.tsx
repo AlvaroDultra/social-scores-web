@@ -26,7 +26,9 @@ export default function LoginPage() {
     try {
       const { data } = await api.post<AuthResponse>("/auth/login", form);
       setAuth(data.token, data.user);
-      router.push("/feed");
+      const redirect = sessionStorage.getItem("redirectAfterLogin") || "/feed";
+      sessionStorage.removeItem("redirectAfterLogin");
+      router.push(redirect);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
         ?.response?.data?.message ?? "Credenciais inválidas";
