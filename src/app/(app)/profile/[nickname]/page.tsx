@@ -7,6 +7,7 @@ import api from "@/lib/api";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import StatsGrid from "@/components/profile/StatsGrid";
 import ScoreHistory from "@/components/profile/ScoreHistory";
+import ScoreChart from "@/components/profile/ScoreChart";
 import { useAuthStore } from "@/store/authStore";
 import type { UserProfile, HistorySummary } from "@/types";
 
@@ -55,6 +56,14 @@ export default function ProfilePage() {
       />
 
       <StatsGrid stats={stats} />
+
+      {/* Gráfico de variação de score */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+          Variação de Score
+        </h2>
+        <ScoreChart nickname={nickname} />
+      </div>
 
       {summary && (
         <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
