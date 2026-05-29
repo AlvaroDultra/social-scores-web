@@ -28,16 +28,16 @@ function formatDate(iso: string) {
     " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
-function CustomTooltip({ active, payload, label }: {
+function CustomTooltip({ active, payload }: {
   active?: boolean;
-  payload?: { value: number }[];
-  label?: string;
+  payload?: { value: number; payload: { date: string } }[];
 }) {
   if (!active || !payload?.length) return null;
   const score = payload[0].value;
+  const date = payload[0].payload.date;
   return (
     <div className="bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-lg text-sm">
-      <p className="text-gray-400 text-xs mb-0.5">{label}</p>
+      <p className="text-gray-400 text-xs mb-0.5">{date}</p>
       <p className={`font-bold ${score >= 0 ? "text-blue-600" : "text-red-500"}`}>
         {score >= 0 ? `+${score}` : score} pts
       </p>
