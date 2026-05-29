@@ -68,7 +68,8 @@ export default function ScoreChart({ nickname }: Props) {
     );
   }
 
-  const formatted = data.map((p) => ({
+  const formatted = data.map((p, i) => ({
+    index: i,
     date: formatDate(p.date),
     score: p.score,
   }));
@@ -95,7 +96,10 @@ export default function ScoreChart({ nickname }: Props) {
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
 
           <XAxis
-            dataKey="date"
+            dataKey="index"
+            type="number"
+            domain={[0, formatted.length - 1]}
+            tickFormatter={(i) => formatted[i]?.date ?? ""}
             tick={{ fontSize: 10, fill: "#9ca3af" }}
             tickLine={false}
             axisLine={false}
