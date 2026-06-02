@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import AuthGuard from "@/components/ui/AuthGuard";
 import NotificationBell from "@/components/ui/NotificationBell";
+import { usePush } from "@/hooks/usePush";
 
 const navItems = [
   { href: "/feed",           label: "Feed",      icon: "🏠" },
@@ -19,6 +20,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, clearAuth, isAuthenticated } = useAuthStore();
+  usePush();
 
   function handleLogout() {
     clearAuth();
