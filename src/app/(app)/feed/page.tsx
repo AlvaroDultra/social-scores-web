@@ -244,7 +244,7 @@ export default function FeedPage() {
               <input
                 ref={videoInputRef}
                 type="file"
-                accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                accept="video/*"
                 onChange={handleVideoChange}
                 className="hidden"
               />
