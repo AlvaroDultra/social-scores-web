@@ -39,7 +39,7 @@ export function usePush() {
         // Cria subscription
         const subscription = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(data.publicKey),
+          applicationServerKey: urlBase64ToUint8Array(data.publicKey) as unknown as BufferSource,
         });
 
         const json = subscription.toJSON();
